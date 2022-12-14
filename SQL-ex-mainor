@@ -1,6 +1,6 @@
 1.
 
-select model, speed, hd from PC (nolock) where pc.price < 500
+Select model, speed, hd from PC where price < 500
 
 ---------------------
 
