@@ -1,0 +1,140 @@
+1.
+
+select model, speed, hd from PC (nolock) where pc.price < 500
+
+---------------------
+
+2.
+
+select distinct maker from product p1 where type = 'printer'
+
+---------------------
+
+3.
+
+Select model, ram, screen from laptop where price > 1000
+
+---------------------
+
+4.
+
+Select * from printer where color = 'y'
+
+---------------------
+
+5.
+
+Select model, speed, hd from pc where price < 600 and cd in ('12x', '24x')
+
+---------------------
+
+6.
+
+select distinct p.maker, l.speed from product p inner join laptop l on p.model = l.model where l.hd >= 10
+
+---------------------
+
+7.
+
+select product.model, laptop.price from product inner join laptop  on product.model = laptop.model where product.maker = 'B'
+union
+select product.model, printer.price from product inner join printer on product.model = printer.model where product.maker = 'B'
+union
+select product.model, pc.price from product inner join pc on product.model = pc.model where product.maker = 'B'
+
+---------------------
+
+8.
+
+select distinct maker from product where type = 'PC' and maker not in (select maker from product where type = 'laptop')
+
+---------------------
+
+9.
+
+select distinct maker from product inner join pc on product.model = pc.model and pc.speed >= 450
+
+---------------------
+
+10.
+
+select distinct model, price from printer where price = (select max(price) from printer)
+
+---------------------
+
+11.
+
+Select avg(speed) from pc
+
+---------------------
+
+12.
+
+Select avg(speed) from laptop where price > 1000
+
+---------------------
+
+13.
+
+Select avg(speed) from pc inner join product on pc.model = product.model where product.maker = 'A'
+
+---------------------
+
+14.
+
+select distinct Ships.class, name, country
+from Ships inner join Classes on Ships.class = Classes.class
+where numGuns >= 10
+
+---------------------
+
+15.
+
+Select hd from pc
+group by hd 
+having count(hd) >= 2
+
+---------------------
+
+16.
+
+select distinct p1.model, p2.model, p1.speed, p1.ram
+from pc p1
+inner join pc p2
+on p1.speed = p2.speed
+and p1.ram = p2.ram
+and (p1.model > p2.model)
+order by p1.speed, p1.ram
+
+---------------------
+
+17.
+
+Select distinct 'Laptop' as Type, model, speed from laptop where speed < (select min(speed) from pc)
+
+---------------------
+
+18.
+
+select distinct product.maker, printer.price 
+from product 
+inner join printer 
+on product.model = printer.model
+where printer.price = (select min(price) from printer where color = 'y')
+and printer.color = 'y'
+
+---------------------
+
+19.
+
+SELECT product.maker, avg(LAPTOP.screen) as [Average Screen Size]
+FROM LAPTOP 
+INNER JOIN PRODUCT on laptop.model = product.model
+group by product.maker
+
+---------------------
+
+20. 
+select maker, count(distinct model) as Count_Model
+from product where type = 'PC' group by maker 
+having count(distinct product.model) >= 3
