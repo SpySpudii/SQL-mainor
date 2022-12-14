@@ -2,37 +2,37 @@
 
 Select model, speed, hd from PC where price < 500
 
----------------------
+---------------------------------------------------
 
 2.
 
 select distinct maker from product p1 where type = 'printer'
 
----------------------
+---------------------------------------------------
 
 3.
 
 Select model, ram, screen from laptop where price > 1000
 
----------------------
+---------------------------------------------------
 
 4.
 
 Select * from printer where color = 'y'
 
----------------------
+---------------------------------------------------
 
 5.
 
 Select model, speed, hd from pc where price < 600 and cd in ('12x', '24x')
 
----------------------
+---------------------------------------------------
 
 6.
 
 select distinct p.maker, l.speed from product p inner join laptop l on p.model = l.model where l.hd >= 10
 
----------------------
+---------------------------------------------------
 
 7.
 
@@ -42,43 +42,42 @@ select product.model, printer.price from product inner join printer on product.m
 union
 select product.model, pc.price from product inner join pc on product.model = pc.model where product.maker = 'B'
 
----------------------
+---------------------------------------------------
 
 8.
 
 select distinct maker from product where type = 'PC' and maker not in (select maker from product where type = 'laptop')
 
----------------------
+---------------------------------------------------
 
 9.
 
 select distinct maker from product inner join pc on product.model = pc.model and pc.speed >= 450
 
----------------------
+---------------------------------------------------
 
 10.
 
 select distinct model, price from printer where price = (select max(price) from printer)
 
----------------------
-
+---------------------------------------------------
 11.
 
 Select avg(speed) from pc
 
----------------------
+---------------------------------------------------
 
 12.
 
 Select avg(speed) from laptop where price > 1000
 
----------------------
+---------------------------------------------------
 
 13.
 
 Select avg(speed) from pc inner join product on pc.model = product.model where product.maker = 'A'
 
----------------------
+---------------------------------------------------
 
 14.
 
@@ -86,7 +85,7 @@ select distinct Ships.class, name, country
 from Ships inner join Classes on Ships.class = Classes.class
 where numGuns >= 10
 
----------------------
+---------------------------------------------------
 
 15.
 
@@ -94,7 +93,7 @@ Select hd from pc
 group by hd 
 having count(hd) >= 2
 
----------------------
+---------------------------------------------------
 
 16.
 
@@ -106,13 +105,13 @@ and p1.ram = p2.ram
 and (p1.model > p2.model)
 order by p1.speed, p1.ram
 
----------------------
+---------------------------------------------------
 
 17.
 
 Select distinct 'Laptop' as Type, model, speed from laptop where speed < (select min(speed) from pc)
 
----------------------
+---------------------------------------------------
 
 18.
 
@@ -123,7 +122,7 @@ on product.model = printer.model
 where printer.price = (select min(price) from printer where color = 'y')
 and printer.color = 'y'
 
----------------------
+---------------------------------------------------
 
 19.
 
@@ -132,9 +131,1142 @@ FROM LAPTOP
 INNER JOIN PRODUCT on laptop.model = product.model
 group by product.maker
 
----------------------
+---------------------------------------------------
 
 20. 
 select maker, count(distinct model) as Count_Model
 from product where type = 'PC' group by maker 
 having count(distinct product.model) >= 3
+
+---------------------------------------------------
+
+21. 
+
+select maker, max(price)
+from Product pr
+inner join PC pc on pc.model = pr.model
+where type = 'pc'
+group by maker
+
+---------------------------------------------------
+
+22. 
+
+select speed, avg(price)
+from PC pc
+where speed > 600
+group by speed
+
+---------------------------------------------------
+
+23. 
+
+select distinct maker 
+from Product pr
+inner join PC pc on pr.model = pc.model
+where speed >= 750 and maker in (select maker from Product pr inner join Laptop lp on lp.model = pr.model where speed >= 750)
+
+---------------------------------------------------
+
+24. 
+
+select model
+from 
+(select model, price 
+from PC
+union
+select model, price
+from Printer
+union 
+select model, price
+from Laptop)t1
+where price = (select max(price) from 
+                      (select price from PC union select price from 
+                      Printer union select price from Laptop)t2)
+
+---------------------------------------------------
+
+25. 
+
+select distinct maker
+from Product
+where model in (
+select model 
+from PC 
+where ram = (select min(ram) from PC)
+and speed = (select max(speed) from PC where ram = (select min(ram) from PC)))
+and 
+maker in (select maker from Product where type = 'printer')
+
+---------------------------------------------------
+
+26. 
+
+select avg(price) as AVG_price
+from (
+select price
+from PC pc inner join Product pr on pr.model = pc.model
+where maker = 'A'
+union all
+select price
+from Laptop lp inner join Product pr on pr.model = lp.model
+where maker = 'A'
+)t1
+
+---------------------------------------------------
+
+27. 
+
+select maker, avg(hd)
+from Product pro
+inner join PC pc on pc.model = pro.model
+where maker in (select maker from Product pro where type = 'printer')
+group by maker
+
+---------------------------------------------------
+
+28. 
+
+select count(*) as qty 
+from (
+select maker 
+from Product pro 
+group by maker
+having count(*) = 1
+)t1
+
+---------------------------------------------------
+
+29. 
+
+select t1.point, t1.date, t1.inc, t1.out
+from (
+select io.point, io.date, inc, out
+from Income_o io left join Outcome_o oo on io.point = oo.point and io.date = oo.date 
+union
+select oo.point, oo.date, inc, out
+from Income_o io right join Outcome_o oo on io.point = oo.point and io.date = oo.date 
+)t1
+
+---------------------------------------------------
+
+30. 
+
+select t1.point, t1.date, sum(distinct(t1.out)) out, sum(distinct(t1.inc)) inc
+from (
+select point, date, sum(out) out, null inc 
+from Outcome o
+group by point, date
+union
+select point, date, null out, sum(inc) inc
+from Income i 
+group by point, date)t1
+group by t1.point, t1.date
+
+---------------------------------------------------
+
+31. 
+
+select class, country
+from Classes c
+where bore >= 16
+
+---------------------------------------------------
+
+32. 
+
+select t1.country, cast(avg(power((t1.bore), 3)/2) as decimal(6,2)) weight from(
+select distinct country, bore, name
+from Classes c
+right join Ships s on s.class = c.class
+where s.name is not null
+union all 
+select distinct country, bore, ship as name
+from Outcomes o 
+right join Classes c on o.ship = c.class
+where c.class not in (select name from Ships)
+)t1
+where t1.name is not null
+group by t1.country
+
+---------------------------------------------------
+
+33. 
+
+select ship 
+from Outcomes
+where battle = 'North Atlantic' and result = 'sunk'
+
+---------------------------------------------------
+
+34. 
+
+select name
+from Ships s
+where launched >= 1922 and
+class in (
+select class from Classes 
+where type = 'bb' and displacement > 35000
+)
+
+---------------------------------------------------
+
+35. 
+
+select model, type
+from Product pro
+where 
+(model not like '%[^0-9]%') 
+or 
+(upper(model) not like '%[^A-Z]%')
+
+---------------------------------------------------
+
+36. 
+
+select Distinct c.class 
+from Ships s
+inner join Classes c on s.class = c.class
+where s.class = s.name
+union 
+select ship 
+from Outcomes o
+where o.ship in (select class from Classes c)
+
+---------------------------------------------------
+
+37. 
+
+select c.class
+from Classes c inner join (
+select s.class, s.name from Ships s
+union 
+select o.ship, o.ship from Outcomes o 
+)t1 on t1.class = c.class
+group by c.class
+having count(t1.name) = 1
+
+---------------------------------------------------
+
+38. 
+
+select distinct country 
+from Classes cl
+where type = 'bc' and country in (select country from Classes cl where type = 'bb')
+
+---------------------------------------------------
+
+39. 
+
+select distinct o.ship
+from Outcomes o, Battles b
+where b.name = o.battle
+and o.result = 'damaged'
+and exists (select bb.date from Battles bb, Outcomes oo
+            where bb.name = oo.battle 
+            and bb.date > b.date and o.ship = oo.ship)
+
+---------------------------------------------------
+
+40. 
+
+select maker, min(type) as type
+from Product p
+group by maker
+having count(distinct type) = 1 and count(model) > 1
+
+---------------------------------------------------
+
+41. 
+
+select q1.maker, case when sum(q1.price) > 0 then max(q1.price) else Null end
+from ( 
+select p.maker, iif(price is null, -1000000, price) price
+from Product p inner join PC pc on pc.model = p.model
+union
+select maker, iif(price is null, -1000000, price) price
+from Product p inner join Printer pr on pr.model = p.model
+union 
+select maker, iif(price is null, -1000000, price) price
+from Product p inner join Laptop l on l.model = p.model
+)q1
+group by q1.maker
+
+---------------------------------------------------
+
+42. 
+
+select ship, battle
+from Outcomes o
+where result = 'sunk'
+
+---------------------------------------------------
+
+43. 
+
+select b.name
+from Battles b
+where year(date) not in (select launched from Ships s where launched is not null)
+
+---------------------------------------------------
+
+44. 
+
+select q1.name
+from (
+select name as name from Ships where name like 'R%' 
+union 
+select ship as name from Outcomes where ship like 'R%' 
+)q1
+
+---------------------------------------------------
+
+45. 
+
+select q1.name
+from (
+select name as name from Ships where name like '% % %'
+union 
+select ship as name from Outcomes where ship like '% % %'
+)q1
+
+---------------------------------------------------
+
+46. 
+
+select distinct ship, displacement, numguns
+from Classes c inner join Ships s on s.class = c.class
+right join Outcomes o on o.ship = s.name or o.ship = c.class
+where o.battle = 'Guadalcanal'
+
+---------------------------------------------------
+
+47. 
+
+select country 
+
+from (
+select class as name, country
+from classes where class in (select ship from outcomes)
+union 
+select name, country from ships s inner join classes c on s.class = c.class
+)t1
+
+left join outcomes o on t1.name = o.ship and o.result = 'sunk'
+group by country 
+having count(*) = count(o.ship)
+
+---------------------------------------------------
+
+48. 
+
+select t1.class
+from (
+select class
+from Classes c inner join Outcomes o on c.class = o.ship
+where result='sunk'
+union 
+select class
+from Ships s inner join Outcomes o on o.ship = s.name
+where result = 'sunk'
+)t1
+
+---------------------------------------------------
+
+49. 
+
+select distinct s.name
+from Ships s left join Classes c on c.class = s.class
+where bore = 16
+union
+select o.ship
+from Outcomes o left join Classes c on c.class = o.ship
+where bore = 16
+
+---------------------------------------------------
+
+50. 
+
+select distinct battle
+from Outcomes o left join Ships s on s.name = o.ship
+where class = 'Kongo'
+
+---------------------------------------------------
+
+51. 
+
+with shipsdata as (
+select t1.name, c.numguns, c.displacement
+from (
+select name, class from ships 
+union
+select ship, ship from Outcomes
+)t1 inner join classes c on t1.class = c.class
+)
+select name from shipsdata s where numguns >= all(select numguns from shipsdata ss where s.displacement = ss.displacement)
+
+---------------------------------------------------
+
+52. 
+
+select name 
+from Ships s inner join Classes c on c.class = s.class
+where type = 'bb' and
+country = 'Japan' and
+(numGuns >= 9 or numGuns is null) and
+(bore < 19 or bore is null) and
+(displacement <= 65000 or displacement is null)
+
+---------------------------------------------------
+
+53. 
+
+select cast(avg(numGuns*1.0) as decimal(6, 2))
+from Classes c
+where type = 'bb'
+
+---------------------------------------------------
+
+54. 
+
+select cast(avg(numGuns*1.0) as decimal(6, 2))
+from (
+select name, numGuns
+from Classes c inner join Ships s on s.class = c.class
+where type = 'bb'
+union 
+select ship, numGuns
+from Outcomes o inner join Classes c on c.class = o.ship
+where type = 'bb'
+)t1
+
+---------------------------------------------------
+
+55. 
+
+select c.class, iif(min(launched) is not null, min(launched), null) year
+from Ships s right join Classes c on c.class = s.class
+group by c.class
+
+---------------------------------------------------
+
+56. 
+
+select c.class, count(t1.ship) sunks
+from (
+select class, name as ship
+from Ships s right join Outcomes o on o.ship = s.name
+where result = 'sunk'
+union 
+select class, ship
+from Classes c right join Outcomes o on o.ship = c.class
+where result = 'sunk'
+)t1 right join Classes c on c.class = t1.class or t1.ship = c.class
+group by c.class
+
+---------------------------------------------------
+
+57. 
+
+with allships as (
+select name, class
+from ships
+union 
+select ship, ship
+from Outcomes
+),
+res as (
+select name, class, result
+from allships left join outcomes on name = ship
+)
+select c.class, count(result) s
+from classes c, res r
+where c.class = r.class and result = 'sunk' and c.class in (select c.class from classes c, allships a
+where c.class = a.class group by c.class having count(name) >= 3)
+group by c.class
+
+---------------------------------------------------
+
+58. 
+
+with typecount as (
+select maker, type, count(model) mS from Product group by maker, type
+),
+allc as (
+select maker, count(model) amS from Product
+group by maker
+),
+allD as (
+select tc.maker, type, tc.mS, aa.amS from typecount tc, allc aa
+where tc.maker = aa.maker
+),
+makertype as (
+select distinct p1.maker, p2.type
+from Product p1, Product p2
+)
+select m.maker, m.type, isnull(cast(cast(mS as decimal(6,2))/amS * 100 as decimal(6,2)), 0) ans
+from makertype m full join allD a on m.maker = a.maker and m.type = a.type
+
+---------------------------------------------------
+
+59. 
+
+select t1.point, t1.inc - iif(t2.out is null, 0, t2.out)
+from
+(
+select point, sum(inc) as inc
+from Income_o io
+group by point
+)t1
+left join
+(select point, sum(out) as out
+from Outcome_o
+group by point
+)t2
+on t1.point = t2.point
+
+---------------------------------------------------
+
+60. 
+
+select t1.point, t1.inc - iif(t2.out is null, 0, t2.out)
+from
+(
+select point, sum(inc) as inc
+from Income_o io
+where date < '2001-04-15'
+group by point
+)t1
+left join
+(select point, sum(out) as out
+from Outcome_o
+where date < '2001-04-15'
+group by point
+)t2
+on t1.point = t2.point
+
+---------------------------------------------------
+
+61. 
+
+select sum(t3.a)
+from (
+select t1.point point, t1.inc - iif(t2.out is null, 0, t2.out) as a
+from
+(
+select point, sum(inc) as inc
+from Income_o io
+group by point
+)t1
+left join
+(select point, sum(out) as out
+from Outcome_o
+group by point
+)t2
+on t1.point = t2.point)t3
+
+---------------------------------------------------
+
+62. 
+
+select sum(t1.inc - iif(t2.out is null, 0, t2.out))
+from
+(
+select point, sum(inc) as inc
+from Income_o io
+where date < '2001-04-15'
+group by point
+)t1
+left join
+(select point, sum(out) as out
+from Outcome_o
+where date < '2001-04-15'
+group by point
+)t2
+on t1.point = t2.point
+
+---------------------------------------------------
+
+63. 
+
+select name
+from Passenger
+where ID_psg in (
+select ID_psg 
+from Pass_in_trip 
+group by place, id_psg 
+having count(*)>1
+)
+
+---------------------------------------------------
+
+64. 
+
+with t1 as (
+select point, date, sum(inc) c1
+from Income
+where concat(point, date) not in (select concat(point, date) from Outcome)
+group by point, date
+),
+t2 as (
+select point, date, sum(out) c2
+from Outcome
+where concat(point, date) not in (select concat(point, date) from Income)
+group by point, date
+)
+select point, date, 'inc', c1
+from t1
+union all
+select point, date, 'out', c2
+from t2
+
+---------------------------------------------------
+
+65. 
+
+select row_number() over(order by maker, ans) c1, 
+case when maker = lag(maker) over(order by maker) then ''
+else maker end c2, type
+from (select distinct maker, type, case when type = 'pc' then 1 when type = 'Laptop' then 2 when type = 'printer' then 3 end ans from product)t1
+
+---------------------------------------------------
+
+66. 
+
+select date, max(num)
+from (
+select date, count(*) as num
+from Trip t, (
+select trip_no, date from Pass_in_trip where date <= '2003-04-07' and date >= '2003-04-01' group by date, trip_no
+)t2
+where town_from = 'Rostov' and t.trip_no = t2.trip_no
+group by date
+union all
+select '2003-04-01', 0
+union all
+select '2003-04-02', 0
+union all
+select '2003-04-03', 0
+union all
+select '2003-04-04', 0
+union all
+select '2003-04-05', 0
+union all
+select '2003-04-06', 0
+union all
+select '2003-04-07', 0)t1
+group by date
+
+---------------------------------------------------
+
+67. 
+
+select count(*) from(
+select top (1) with ties count(*) num
+from Trip
+group by town_from, town_to
+order by num DESC)t1
+
+---------------------------------------------------
+
+68. 
+
+select count(*) from(
+select top (1) with ties sum(n) num, town_from, town_to
+from (
+select count(*) n, town_from, town_to
+from Trip
+where town_from <= town_to 
+group by town_from, town_to
+union all
+select count(*) n, town_to, town_from
+from Trip
+where town_from >= town_to
+group by town_to, town_from
+)t2
+group by town_from, town_to
+order by num DESC)t1
+
+---------------------------------------------------
+
+69. 
+
+with t1 as (
+select point, date, sum(out) out
+from Outcome o 
+group by point, date
+), 
+t2 as (
+select point, date, sum(inc) inc
+from Income i
+group by point, date
+),
+t3 as (
+select coalesce(t2.point, t1.point) point,
+coalesce(t2.date, t1.date) day,
+(isnull(t2.inc, 0) - isnull(t1.out, 0)) dsum
+from t2 full join t1 on t2.point = t1.point and t2.date = t1.date
+)
+select point, format(day, 'dd/MM/yyyy'), sum(dsum) over(partition by point order by day) ans
+from t3
+
+---------------------------------------------------
+
+70. 
+
+select distinct battle
+from Outcomes o left join Ships s on s.name = o.ship
+left join Classes c on c.class = s.class or c.class = o.ship
+where country is not null
+group by battle, country
+having count(ship) >= 3
+
+---------------------------------------------------
+
+71. 
+
+select distinct maker
+from Product pr
+left join pc on pc.model = pr.model
+where type = 'pc'
+group by maker
+having count(pc.model) = count(pr.model)
+
+---------------------------------------------------
+
+72. 
+
+select top 1 with ties name, c 
+from passenger
+inner join 
+(select i1, max(c) c
+from
+(select pt.id_psg i1, t.id_comp, count(*) c
+from pass_in_trip pt inner join trip t on t.trip_no = pt.trip_no
+group by pt.id_psg, t.id_comp
+)t
+group by i1
+having count(*) = 1)tt
+on id_psg = i1 order by c DESC
+
+---------------------------------------------------
+
+73. 
+
+select distinct country, b.name
+from Classes c, Battles b
+except (
+select country, battle
+from Outcomes o
+left join Ships s on s.name = o.ship
+left join Classes c on c.class = s.class or o.ship = c.class
+where country is not null
+group by country, battle
+)
+
+---------------------------------------------------
+
+74. 
+
+select country, class
+from Classes c
+where country = case when exists(select country, class from Classes c where country = 'Russia') then 'Russia' else country end
+
+---------------------------------------------------
+
+75. 
+
+select maker, max(l.price), max(pc.price), max(pr.price)
+from laptop l 
+right join product p on l.model = p.model 
+left join pc on pc.model = p.model 
+left join printer pr on p.model = pr.model
+where maker in (
+select maker from product where model in (
+select model from pc where price is not null 
+union all
+select model from printer where price is not null 
+union all
+select model from laptop where price is not null)
+) group by maker
+
+---------------------------------------------------
+
+76. 
+
+with t1 as (
+select row_number() over(partition by pt.id_psg, place order by date) c1, 
+case when time_out > time_in then (datediff(mi, time_out, dateadd(day, 1, time_in))) else datediff(mi, time_out, time_in) end c2, pt.id_psg, p.name
+from pass_in_trip pt inner join trip t on pt.trip_no = t.trip_no
+inner join passenger p on pt.id_psg = p.id_psg
+)
+select max(name), sum(c2) 
+from t1
+group by id_psg
+having max(c1) = 1
+
+---------------------------------------------------
+
+77. 
+
+with t1 as (select count(distinct t.trip_no) c1, date c2
+from Trip t inner join pass_in_trip pt on pt.trip_no = t.trip_no
+where town_from = 'Rostov'
+group by date)
+select c1, c2 from t1
+where c1 = (select max(c1) from t1)
+
+---------------------------------------------------
+
+78. 
+
+select name, cast(concat(year(date), '-', month(date), '-', 1) as date) c1, cast(concat(year(date), '-', month(date), '-', day(eomonth(date))) as date) c2
+from battles
+
+---------------------------------------------------
+
+79. 
+
+with t1 as (select id_psg, 
+sum(case when time_out >= time_in 
+        then (datediff(mi, time_out, time_in) + 24*60)
+        else (datediff(mi, time_out, time_in)) end) ans
+from trip t inner join pass_in_trip pt on t.trip_no = pt.trip_no
+group by id_psg)
+select name, ans
+from passenger p inner join t1 on t1.id_psg = p.id_psg
+where ans = (select max(ans) from t1)
+
+
+---------------------------------------------------
+
+80. 
+
+select maker
+from product
+except
+select maker 
+from product 
+where type = 'pc'
+and
+model not in (select model from PC)
+
+---------------------------------------------------
+
+81. 
+
+with t1 as (
+select *, sum(out) over (partition by year(date), month(date)) ans
+from Outcome
+)
+select code, point, date, out 
+from t1
+where ans = (select max(ans) from t1)
+
+---------------------------------------------------
+
+82.
+
+with t1 as (select *, 
+row_number() over(order by code) curr
+from pc)
+select code, (select avg(price) from t1 where curr between tt1.curr and tt1.curr+5)tans
+from t1 tt1
+where curr <= (select max(curr) -5 from t1)
+
+---------------------------------------------------
+
+83. 
+
+with t1 as (select name, 
+case when numguns = 8 then 1 else 0 end c1,
+case when bore = 15 then 1 else 0 end c2,
+case when displacement = 32000 then 1 else 0 end c3,
+case when type = 'bb' then 1 else 0 end c4,
+case when launched = 1915 then 1 else 0 end c5,
+case when c.class = 'Kongo' then 1 else 0 end c6,
+case when country = 'USA' then 1 else 0 end c7
+from ships s inner join classes c on c.class = s.name or s.class = c.class
+)
+select distinct name
+from t1 
+where c1+c2+c3+c4+c5+c6+c7 >= 4
+
+---------------------------------------------------
+
+84. 
+
+with t1 as (
+select id_comp, sum(iif(day(pt.date) < 11, 1, 0)) c2, 
+sum(iif(day(pt.date) >= 11 and day(pt.date) <21, 1, 0)) c3,
+sum(iif(day(pt.date) >= 21, 1, 0)) c4
+from trip t inner join pass_in_trip pt on t.trip_no = pt.trip_no 
+where month(pt.date) = 4 and year(pt.date) = 2003
+group by id_comp
+)
+select distinct name, c2, c3, c4 
+from t1 left join company c on t1.id_comp = c.id_comp
+
+---------------------------------------------------
+
+85. 
+
+select maker
+from product where type = 'printer'
+except (select maker from product where type != 'printer')
+union 
+(select maker
+from product where type = 'pc'
+group by maker
+having count(*) >= 3
+except select maker from product where type != 'pc')
+
+---------------------------------------------------
+
+86. 
+
+select maker,
+case count(distinct type) when 1 then max(type)
+when 2 then min(type) + '/' + max(type)
+else 'laptop/pc/printer' end
+from product
+group by maker
+
+---------------------------------------------------
+
+87. 
+
+with t1 as (select pt.date, id_psg, t.* from pass_in_trip pt inner join trip t on pt.trip_no = t.trip_no),
+t2 as (select id_psg, min(date+time_out) dt from t1 group by id_psg),
+t3 as (select t2.id_psg from t1 inner join t2 on (t1.date+t1.time_out) = t2.dt where town_from != 'Moscow')
+select distinct name, count(*) 
+from t1 inner join passenger p on t1.id_psg = p.id_psg 
+where town_to = 'Moscow' and t1.id_psg in (select * from t3)
+group by t1.id_psg, p.name
+having count(*) > 1
+
+---------------------------------------------------
+
+88. 
+
+with t1 as (
+select pt.id_psg, count(t.id_comp) fnum,
+max(count(t.id_comp)) over() maxF,
+min(t.id_comp) comID
+from trip t, pass_in_trip pt
+where t.trip_no = pt.trip_no
+group by pt.id_psg
+having min(t.id_comp) = max(t.id_comp)
+),
+t2 as (
+select id_psg, fnum, comID
+from t1 where fnum = maxF
+)
+select (select name from passenger p where p.id_psg = t2.id_psg) name, 
+fnum as trip_num,
+(select name from Company c where c.id_comp = t2.comid) Company 
+from t2
+
+---------------------------------------------------
+
+89. 
+
+with t1 as (
+select maker, count(model) c2
+from product
+group by maker
+)
+select maker, c2 
+from t1
+where c2 = (select min(c2) from t1) or c2 = (select max(c2) from t1)
+
+---------------------------------------------------
+
+90.
+
+with t1 as (
+select row_number() over(order by model) c1, model
+from product
+),
+t2 as (
+select row_number() over(order by model DESC) c1, model
+from product
+) 
+select * from product
+where model not in (
+select model
+from t1 where c1 <= 3
+union
+select model 
+from t2 where c1 <= 3)
+
+---------------------------------------------------
+
+91. 
+
+select cast(sum(c2)/count(c2) as decimal(6, 2))
+from (
+select distinct q_name, sum(cast(isnull(b_vol, 0) as decimal(6, 2))) c2
+from utq left join utb on utq.q_id = utb.b_q_id
+group by q_name
+)t1
+
+---------------------------------------------------
+
+92. 
+
+select distinct q_name 
+from utq
+where q_id in (select distinct t1.b_q_id
+from (select b_q_id
+from utb
+group by b_q_id having(sum(b_vol)) = 765)t1
+where t1.b_q_id not in (select b_q_id from utb where b_v_id in (select b_v_id from utb group by b_v_id having sum(b_vol) < 255))
+)
+
+---------------------------------------------------
+
+93. 
+
+select name, sum(ans)
+from
+(select distinct id_comp, pt.trip_no, date, time_in, time_out, --id_psg,
+case when time_out > time_in then datediff(mi, time_out, time_in + 1) else datediff(mi, time_out, time_in) end ans
+from pass_in_trip pt inner join trip t on pt.trip_no = t.trip_no
+)t1
+inner join company c on t1.id_comp = c.id_comp
+group by name
+
+---------------------------------------------------
+
+94. 
+
+with t1 as (
+select date, count(distinct pt.trip_no) c1,
+max(count(distinct pt.trip_no)) over() c2
+from pass_in_trip pt left join trip t on pt.trip_no = t.trip_no
+where town_from = 'Rostov'
+group by date
+),
+t2 as (
+select top 1 (date), numday=1
+from t1 where c1 = c2
+order by date
+union all
+select date + 1, numday+1 from t2 where numday <= 6
+)
+select t2.date, isnull(c1, 0)
+from t2 left join t1 on t2.date = t1.date
+
+---------------------------------------------------
+
+95. 
+
+with t1 as (
+select id_comp, row_number() over(partition by id_comp, date, t.trip_no order by date) c1,
+row_number() over(partition by id_comp, plane order by plane) c2,
+row_number() over(partition by id_comp, id_psg order by id_psg) c3
+from pass_in_trip pt
+inner join trip t on pt.trip_no = t.trip_no
+)
+select (select name from Company where id_comp = t1.id_comp) a1,
+sum(case when c1 = 1 then 1 else 0 end) a2,
+sum(case when c2 = 1 then 1 else 0 end) a3,
+sum(case when c3 = 1 then 1 else 0 end) a4,
+count(c3) a5
+from t1
+group by id_comp
+
+---------------------------------------------------
+
+96. 
+
+with t1 as (
+select v_name, b_q_id q
+from utv, utb
+where v_color = 'r' and v_id in (select b_v_id from utb group by b_v_id having count(*) > 1) and v_id = b_v_id
+),
+t2 as (
+select b_q_id q from utb b, utv v where v.v_color = 'b' and v.v_id = b.b_v_id
+)
+select distinct t1.v_name
+from t2, t1
+where t2.q = t1.q
+
+---------------------------------------------------
+
+97. 
+
+with t1 as (
+select code, spec, data, 
+row_number() over(partition by code order by data) c1
+from (
+select code, cast(speed as real) speed, 
+cast(ram as real) ram, 
+cast(price as real) price, 
+cast(screen as real) screen from Laptop
+)tt1
+unpivot(data for spec in (speed, ram, price, screen))tt2
+),
+t3 as (
+select t1.code
+from t1, t1 as t2 
+where t1.code = t2.code and t1.c1 < 4 and t1.c1+1 = t2.c1 and t1.data * 2 <= t2.data
+group by t1.code
+having count(*) = 3)
+select code, speed, ram, price, screen
+from Laptop where code in (select * from t3)
+
+---------------------------------------------------
+
+98. 
+
+with t1 as (
+select code, (speed | ram) c1
+from pc
+),
+t2 as (
+select code, c1, cast(c1 as int) a1, cast('' as varchar(max)) a2
+from t1
+union all
+select code, c1, t2.a1 / 2, cast(t2.a1 % 2 as varchar(35)) + t2.a2
+from t2 where t2.a1 > 0
+),
+t3 as (
+select * from t2 where a1 = 0 and a2 like '%1111%'
+)
+select pc.code, speed, ram
+from pc, t3 where pc.code = t3.code
+
+---------------------------------------------------
+
+99. 
+
+with t1 as (
+select point, date, date nD
+from Income_o io
+union all
+select point, date, nD + 1
+from t1 where nD in (select date from Outcome_o oo where point = t1.point) or datepart(dw, nD) = 1
+),
+t2 as (
+select point, date, max(nD) mD
+from t1 group by point, date
+)
+select point, date D, iif(date = mD, date, mD) ans
+from t2
+
+---------------------------------------------------
+
+100. 
+
+with t1 as (
+select row_number() over(partition by date order by code) c1, *
+from outcome
+),
+t2 as (
+select row_number() over(partition by date order by code) c1, *
+from income
+)
+select coalesce(t2.date, t1.date) a1, coalesce(t2.c1, t1.c1) a2, t2.point, inc, t1.point, out
+from t2 full join t1 on t2.date = t1.date and t2.c1 = t1.c1
